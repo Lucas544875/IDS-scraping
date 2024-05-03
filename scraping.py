@@ -1,19 +1,35 @@
 import requests
 from bs4 import BeautifulSoup
+import json
+import time
 
-# スクレイピング対象の URL にリクエストを送り HTML を取得する
-res = requests.get("https://jigen.net/data/%E5%B8%B8%E7%94%A8%E6%BC%A2%E5%AD%97?rs=300&so=0&ou=000&od=DESC&pg=1")
+# スクレイピング対象のURL
+url = "https://jigen.net/data/%E5%B8%B8%E7%94%A8%E6%BC%A2%E5%AD%97?rs=1000&so=0&ou=000&od=DESC&pg="
 
-# レスポンスの HTML から BeautifulSoup オブジェクトを作る
-soup = BeautifulSoup(res.text, 'html.parser')
+# 3ページ分のURLを取得
+kanji_url = []
+for i in range(3):
+    response = requests.get(url+str(i+1))
+    html = response.text
+    soup = BeautifulSoup(html, "html.parser")
+    kanji_url += soup.find("ul", {"class": "ka_list"}).find_all("a")
 
-# title タグの文字列を取得する
-# title_text = soup.find('title').get_text()
-# print(title_text)
-# > Quotes to Scrape
-kanjis = soup.find_all('td', {'class': 'td2'})
 
-# class が quote の div 要素を全て取得する
-# quote_elms = soup.find_all('div', {'class': 'quote'})
-# print(len(quote_elms))
-# > 10
+# 漢字構成を取得
+data = {}
+progress = 0
+for j in kanji_url:
+    href = j.get("href")
+    url  = "https://jigen.net"+href
+    soup = BeautifulSoup(requests.get(url).text, "html.parser")
+    kanji = soup.strong.text
+    ids = [x.text for x in soup.find(id = "kjid").find_all("dl")[1].find("dt",string="漢字構成").next_sibling.find_all("li")]
+    data[kanji] = ids
+    time.sleep(1)
+    progress += 1
+    if progress % 100 == 0:
+        print(progress)
+
+# ファイルに保存
+with open('data/joyo.json', mode='w') as f:
+    f.write(json.dumps(data,indent=4))

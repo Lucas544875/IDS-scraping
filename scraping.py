@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import time
+import re
 
 # スクレイピング対象のURL
 url = "https://jigen.net/data/%E5%B8%B8%E7%94%A8%E6%BC%A2%E5%AD%97?rs=1000&so=0&ou=000&od=DESC&pg="
@@ -24,6 +25,8 @@ for j in kanji_url:
     soup = BeautifulSoup(requests.get(url).text, "html.parser")
     kanji = soup.strong.text
     ids = [x.text for x in soup.find(id = "kjid").find_all("dl")[1].find("dt",string="漢字構成").next_sibling.find_all("li")]
+    for i in range(len(ids)):
+        ids[i-1] = re.sub(r'#[0-9]*', '', ids[i-1])
     data[kanji] = ids
     time.sleep(1)
     progress += 1

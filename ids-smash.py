@@ -13,13 +13,13 @@ with open(inputfile, mode="r", encoding="utf-8") as f:
 def ids_split(ids):
     return re.findall(r'[^&]|&.*;', ids)
 
-def ids_rec(char, data, level=0):
+def ids_rec(char, data):
     if char not in data:
         return char
     ids = ids_split(data[char][0])
     if len(ids) == 1:
         return char
-    ids_ary = [ids_rec(c, data, level+1) for c in ids]
+    ids_ary = [ids_rec(c, data) for c in ids]
     return "".join(ids_ary)
 
 data_smashed = {}

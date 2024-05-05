@@ -27,4 +27,4 @@ for kanji in data:
     current_elem[ids_ary[-1]] = kanji
 
 with open(outputfile, mode="w", encoding="utf-8") as g:
-    g.write(json.dumps(tree,indent=4))
+    g.write(json.dumps(tree))
